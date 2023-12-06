@@ -86,7 +86,7 @@ class Ticker(RelativeLayout):
 
     def on_data(self, widget, value):
         """ Set TickerElement class style """
-        
+
         self._create_widgets()
 
     def on_labelclass(self, widget, value):
@@ -129,6 +129,9 @@ class Ticker(RelativeLayout):
 
         if self.data and not self.force_animation and self.size[0] > self.children_width and self.orientation == 'x':
             return self._create_widget_nonanimated()
+        
+        elif self.orientation == 'x':
+            self.children_number = 3
             
         self._create_widgets_x() if self.orientation == 'x' else self._create_widgets_y()
         self._set_ticker_label_styles()
@@ -160,7 +163,7 @@ class Ticker(RelativeLayout):
                 width = self.children_width,
                 height=self.children_height,
                 pos_hint= {'center_x':0.5},
-                pos=(0, self.pos[1] + (self.children_height + self.divider) * entry )
+                pos=(0, 10 + (self.children_height + self.divider) * entry )
             )
 
             self.container.add_widget(_tmp_entry)
@@ -172,7 +175,7 @@ class Ticker(RelativeLayout):
                 width = self.children_width,
                 height=self.children_height,
                 pos_hint= {'center_y':0.5},
-                pos=(self.pos[0] + (self.children_width + self.divider) * entry, 0)
+                pos=(10 + (self.children_width + self.divider) * entry, 0)
             )
 
             self.container.add_widget(_tmp_entry)
@@ -232,7 +235,7 @@ class Ticker(RelativeLayout):
             self.tickerEvent = Clock.schedule_interval(self._animation,self.t)
         
     def stop_animation(self):
-        if self.children_number > 1:
+        if self.children_number > 1 and 'tickerEvent' in dir(self):
             self.tickerEvent.cancel()
 
 styles = ("""           
@@ -249,33 +252,43 @@ class TickerApp(App):
     def build(self):
         root = GridLayout(cols=2)
 
-        self.ticker1 = Ticker(fit_size = True,
+        self.ticker1 = Ticker(
+            fit_size = True,
             size=(200,200), 
             orientation = 'x'
         )
         self.ticker1.data = {'text': "Very very very very very very very very very very very very very very very long text", 'font_size':'20sp'}     
-        root.add_widget(self.ticker1)
         
-        self.ticker2 = Ticker(fit_size = True,
-            size=(200,200), 
+        self.ticker2 = Ticker(
+            fit_size = True,
+            size=(200,200),
+            data = {'text': "Y axis orientation", 'font_size':'20sp'},
             orientation = 'y', children_number= 16
         )
-        self.ticker2.data = {'text': "Y axis orientation", 'font_size':'20sp'}     
+
+        self.ticker3 = Ticker(
+            fit_size = True,
+            size=(200,200), 
+            orientation = 'x',
+            children_number= 6
+        )
+        self.ticker3.data = {'text': "force_animation set to False\n<I am not out of bounds!!!>", 'font_size':'30sp', 'color': (1,0,0,1)}     
+
+        self.ticker4 = Ticker(
+            fit_size = True,
+            size=(200,200), 
+            orientation = 'x',
+            force_animation = True,
+            children_number= 5,
+            divider = 100
+        )
+        self.ticker4.data = {'text': "force_animation set to True", 'font_size':'20sp'}
+
+        root.add_widget(self.ticker1)
         root.add_widget(self.ticker2)
-
-        self.ticker3 = Ticker(fit_size = True,
-            size=(200,200), 
-            orientation = 'x', children_number= 6
-        )
-        self.ticker3.data = {'text': "force_animation set to False", 'font_size':'30sp', 'color': (1,0,0,1)}     
         root.add_widget(self.ticker3)
-
-        self.ticker4 = Ticker(fit_size = True,
-            size=(200,200), 
-            orientation = 'x', force_animation = True, children_number= 5, divider = 100
-        )
-        self.ticker4.data = {'text': "force_animation set to False", 'font_size':'20sp'}     
         root.add_widget(self.ticker4)
+        
 
         self.ticker1.start_animation(-2)
         self.ticker2.start_animation()
